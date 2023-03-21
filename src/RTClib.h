@@ -124,6 +124,101 @@ enum Pcf8563SqwPinMode {
   PCF8563_SquareWave32kHz = 0x80 /**< 32kHz square wave */
 };
 
+
+
+
+enum PT7C433833_Registers {
+	PT7C433833_Register_Seconds = 0x0,
+	PT7C433833_Register_Minutes = 0x1,
+	PT7C433833_Register_Hours = 0x2,
+	PT7C433833_Register_DaysOfTheWeek = 0x3,
+	PT7C433833_Register_Dates = 0x4,
+	PT7C433833_Register_Months = 0x5,
+	PT7C433833_Register_Years = 0x6,
+	PT7C433833_Register_Control = 0x7,
+	PT7C433833_Register_RAM = 0x8
+};
+enum PT7C433833_Control_Register {
+	PT7C433833_Control_RS0 = 0x0,
+	PT7C433833_Control_RS1 = 0x1,
+	PT7C433833_Control_SQWE = 0x4,
+	PT7C433833_Control_OSF = 0x5,
+	PT7C433833_Control_OUT = 0x7
+};
+enum PT7C433833_RateSelect_Register {
+	PT7C433833_RateSelect_SQW_Output_1Hz = 0b00,
+	PT7C433833_RateSelect_SQW_Output_4k096Hz = 0b01,
+	PT7C433833_RateSelect_SQW_Output_8k192Hz = 0b10,
+	PT7C433833_RateSelect_SQW_Output_32k768Hz = 0b11
+};
+enum PT7C433833_Seconds_Register {
+	PT7C433833_Seconds_S1 = 0x0,
+	PT7C433833_RateSelect_S2 = 0x1,
+	PT7C433833_RateSelect_S4 = 0x2,
+	PT7C433833_RateSelect_S8 = 0x3,
+	PT7C433833_RateSelect_S10 = 0x4,
+	PT7C433833_RateSelect_S20 = 0x5,
+	PT7C433833_RateSelect_S40 = 0x6,
+	PT7C433833_RateSelect_EOSC = 0x7
+};
+
+enum PT7C433833_Mintues_Register {
+	PT7C433833_Minutes_M1 = 0x0,
+	PT7C433833_Minutes_M2 = 0x1,
+	PT7C433833_Minutes_M4 = 0x2,
+	PT7C433833_Minutes_M8 = 0x3,
+	PT7C433833_Minutes_M10 = 0x4,
+	PT7C433833_Minutes_M20 = 0x5,
+	PT7C433833_Minutes_M40 = 0x6
+};
+
+enum PT7C433833_Hours_Register {
+	PT7C433833_Hours_H1 = 0x0,
+	PT7C433833_Hours_H2 = 0x1,
+	PT7C433833_Hours_H4 = 0x2,
+	PT7C433833_Hours_H8 = 0x3,
+	PT7C433833_Hours_H10 = 0x4,
+	PT7C433833_Hours_H20_P_A = 0x5,
+	PT7C433833_Hours_H12_24 = 0x6
+};
+enum PT7C433833_ClockSystem_Register {
+	PT7C433833_ClockSystem_Clock_24 = 0x0,
+	PT7C433833_ClockSystem_Clock_12 = 0x1,
+};
+enum PT7C433833_DaysOfTheWeekCounter_Register {
+	PT7C433833_DaysOfTheWeekCounter_D0 = 0x0,
+	PT7C433833_DaysOfTheWeekCounter_D1 = 0x1,
+	PT7C433833_DaysOfTheWeekCounter_D2 = 0x2
+};
+enum PT7C433833_Dates_Register {
+	PT7C433833_Dates_D1 = 0x0,
+	PT7C433833_Dates_D2 = 0x1,
+	PT7C433833_Dates_D4 = 0x2,
+	PT7C433833_Dates_D8 = 0x3,
+	PT7C433833_Dates_D10 = 0x4,
+	PT7C433833_Dates_D20 = 0x5,
+};
+enum PT7C433833_Months_Register {
+	PT7C433833_Months_M1 = 0x0,
+	PT7C433833_Months_M2 = 0x1,
+	PT7C433833_Months_M4 = 0x2,
+	PT7C433833_Months_M8 = 0x3,
+	PT7C433833_Months_M10 = 0x4,
+};
+
+enum PT7C433833_Years_Register {
+	PT7C433833_Years_Y1 = 0x0,
+	PT7C433833_Years_Y2 = 0x1,
+	PT7C433833_Years_Y4 = 0x2,
+	PT7C433833_Years_Y8 = 0x3,
+	PT7C433833_Years_Y10 = 0x4,
+	PT7C433833_Years_Y20 = 0x5,
+	PT7C433833_Years_Y40 = 0x6,
+	PT7C433833_Years_Y80 = 0x7,
+};
+
+
+
 /**************************************************************************/
 /*!
     @brief  Simple general-purpose date/time class (no TZ / DST / leap
@@ -442,6 +537,41 @@ public:
   Pcf8563SqwPinMode readSqwPinMode();
   void writeSqwPinMode(Pcf8563SqwPinMode mode);
 };
+
+
+
+/**************************************************************************/
+/*!
+    @brief  RTC based on the RTC_PT7C433833 chip connected via I2C and the Wire library
+*/
+/**************************************************************************/
+class RTC_PT7C433833 : RTC_I2C {
+public:
+  bool begin(TwoWire *wireInstance = &Wire);
+  bool lostPower(void);
+  void adjust(const DateTime &dt);
+  uint8_t isrunning(void);
+  DateTime now();
+  PT7C433833_RateSelect_Register readSqwPinMode();
+  void writeSqwPinMode(PT7C433833_RateSelect_Register mode);
+  void enable32K(void);
+  void disable32K(void);
+  bool isEnabled32K(void);
+  uint8_t readnvram(uint8_t address);
+  void readnvram(uint8_t *buf, uint8_t size, uint8_t address);
+  void writenvram(uint8_t address, uint8_t data);
+  void writenvram(uint8_t address, const uint8_t *buf, uint8_t size);
+  /*!
+      @brief  Convert the day of the week to a representation suitable for
+              storing in the DS3231: from 1 (Monday) to 7 (Sunday).
+      @param  d Day of the week as represented by the library:
+              from 0 (Sunday) to 6 (Saturday).
+      @return the converted value
+  */
+  static uint8_t dowToPT7C433833(uint8_t d) { return d == 0 ? 7 : d; }
+};
+
+
 
 /**************************************************************************/
 /*!
