@@ -64,8 +64,35 @@ void RTC_PT7C433833::adjust(const DateTime &dt) {
 */
 /**************************************************************************/
 uint8_t RTC_PT7C433833::isrunning() {
-  return !(read_register(PT7C433833_Control_OSF) & 1);
+  return !(read_register(PT7C433833_CONTROL_REGISTER) & PT7C433833_Control_OSF);
 }
+
+
+
+
+bool RTC_PT7C433833::deviceStart() {
+	uint8_t ctrl = read_register(PT7C433833_CONTROL_REGISTER);
+
+    ctrl &= ~(PT7C433833_Control_OSF); // turn off INTCON
+    ctrl &= ~(PT7C433833_RateSelect_EOSC); // set freq bits to 0
+
+    write_register(PT7C433833_CONTROL_REGISTER, ctrl);
+	
+	if(isrunning() > 0) return true;
+	return false;
+	
+}
+bool RTC_PT7C433833::deviceStop() {
+	uint8_t ctrl = read_register(PT7C433833_CONTROL_REGISTER);
+
+    ctrl |= PT7C433833_RateSelect_EOSC; // set freq bits to 0
+
+    write_register(PT7C433833_CONTROL_REGISTER, ctrl);
+	
+	if(isrunning() > 0) return true;
+	return false;
+}
+
 
 /**************************************************************************/
 /*!

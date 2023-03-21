@@ -551,6 +551,8 @@ public:
   bool lostPower(void);
   void adjust(const DateTime &dt);
   uint8_t isrunning(void);
+  bool deviceStart();
+  bool deviceStop();
   DateTime now();
   PT7C433833_RateSelect_Register readSqwPinMode();
   void writeSqwPinMode(PT7C433833_RateSelect_Register mode);
